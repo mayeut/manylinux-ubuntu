@@ -6,21 +6,25 @@ on:
   push:
     branches:
       - main
-      - init
+
+env:
+  REGISTRY_IMAGE: ghcr.io/${{ github.repository_owner }}/manylinux_2_35
 
 jobs:
   build_image:
     name: Build ${{ matrix.platform }} image
     runs-on: ubuntu-latest
+    permissions:
+      packages: write
+      contents: read
     strategy:
       fail-fast: false
       matrix:
         platform:
-          - linux/amd64
-          # - linux/arm/v7
-          - linux/arm64
-          - linux/s390x
-          - linux/ppc64le
+          - amd64
+          - arm64
+          - s390x
+          - ppc64le
     steps:
       - uses: actions/checkout@v4
         with:
@@ -36,7 +40,7 @@ jobs:
         uses: docker/build-push-action@v6
         with:
           context: .
-          platforms: ${{ matrix.platform }}
+          platforms: linux/${{ matrix.platform }}
           load: true
           push: false
           tags: manylinux_2_35:latest
@@ -45,3 +49,96 @@ jobs:
 
       - name: Test ${{ matrix.platform }} image
         run: docker run --rm -v $(pwd)/tests:/tests:ro manylinux_2_35:latest /tests/run_tests.sh
+
+      - name: Login to GitHub Container Registry
+        if: github.event_name == 'push'
+        uses: docker/login-action@v3
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Push ${{ matrix.platform }} image by digest
+        if: github.event_name == 'push'
+        id: build
+        uses: docker/build-push-action@v6
+        with:
+          context: .
+          platforms: linux/${{ matrix.platform }}
+          push: true
+          cache-from: type=gha,scope=${{ matrix.platform }}
+          outputs: type=image,name=${{ env.REGISTRY_IMAGE }},push-by-digest=true,name-canonical=true,push=true
+
+      - name: Export digest
+        if: github.event_name == 'push'
+        run: |
+          mkdir -p /tmp/digests
+          digest="${{ steps.build.outputs.digest }}"
+          touch "/tmp/digests/${digest#sha256:}"
+
+      - name: Upload digest
+        if: github.event_name == 'push'
+        uses: actions/upload-artifact@v4
+        with:
+          name: digests-${{ matrix.platform }}
+          path: /tmp/digests/*
+          if-no-files-found: error
+          retention-days: 1
+
+  merge:
+    if: github.event_name == 'push'
+    runs-on: ubuntu-latest
+    permissions:
+      packages: write
+      contents: read
+    needs:
+      - build_image
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 50
+
+      - name: Download digests
+        uses: actions/download-artifact@v4
+        with:
+          path: /tmp/digests
+          pattern: digests-*
+          merge-multiple: true
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+
+      - name: Get tag name
+        id: tag
+        run: |
+          COMMIT_DATE=$(git show -s --format=%cd --date=short ${{ github.sha }})
+          # Dependabot does not work with the BUILD_ID format
+          # Use a version like tag
+          if $(git rev-parse --is-shallow-repository); then
+            git fetch --unshallow
+          fi
+          BUILD_NUMBER=$(git rev-list --since=${COMMIT_DATE}T00:00:00Z --first-parent --count ${{ github.sha }})
+          BUILD_ID2=${COMMIT_DATE//-/.}-${BUILD_NUMBER}
+          echo "tag=${BUILD_ID2}" >> "$GITHUB_OUTPUT"
+
+      - name: Docker meta
+        id: meta
+        uses: docker/metadata-action@v5
+        with:
+          images: ${{ env.REGISTRY_IMAGE }}
+          tags: |
+            type=raw,value=latest
+            type=raw,value=${{ steps.tag.outputs.tag }}
+
+      - name: Login to GitHub Container Registry
+        uses: docker/login-action@v3
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Create manifest list and push
+        working-directory: /tmp/digests
+        run: |
+          docker buildx imagetools create $(jq -cr '.tags | map("-t " + .) | join(" ")' <<< "$DOCKER_METADATA_OUTPUT_JSON") \
+            $(printf '${{ env.REGISTRY_IMAGE }}@sha256:%s ' *)
