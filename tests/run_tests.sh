@@ -12,7 +12,7 @@ elif [ "${AUDITWHEEL_POLICY:0:10}" == "musllinux_" ]; then
 	PACKAGE_MANAGER=apk
 elif [ "${AUDITWHEEL_POLICY}" == "manylinux_2_28" ]; then
 	PACKAGE_MANAGER=dnf
-elif [ "${AUDITWHEEL_POLICY}" == "manylinux_2_35" ]; then
+elif [ "${AUDITWHEEL_POLICY}" == "manylinux_2_31" ] || [ "${AUDITWHEEL_POLICY}" == "manylinux_2_35" ]; then
 	PACKAGE_MANAGER=none
 else
 	echo "Unsupported policy: '${AUDITWHEEL_POLICY}'"
