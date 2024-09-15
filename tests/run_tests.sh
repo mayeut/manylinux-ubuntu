@@ -12,7 +12,7 @@ elif [ "${AUDITWHEEL_POLICY:0:10}" == "musllinux_" ]; then
 	PACKAGE_MANAGER=apk
 elif [ "${AUDITWHEEL_POLICY}" == "manylinux_2_28" ]; then
 	PACKAGE_MANAGER=dnf
-elif [ "${AUDITWHEEL_POLICY}" == "manylinux_2_35" ]; then
+elif [ "${AUDITWHEEL_POLICY}" == "manylinux_2_31" ] || [ "${AUDITWHEEL_POLICY}" == "manylinux_2_35" ]; then
 	PACKAGE_MANAGER=none
 else
 	echo "Unsupported policy: '${AUDITWHEEL_POLICY}'"
@@ -67,7 +67,7 @@ for PYTHON in /opt/python/*/bin/python; do
 	if [ "${IMPLEMENTATION}" == "cpython" ]; then
 		# Make sure sqlite3 module can be loaded properly and is the manylinux version one
 		# c.f. https://github.com/pypa/manylinux/issues/1030
-		$PYTHON -c 'import sqlite3; print(sqlite3.sqlite_version); assert sqlite3.sqlite_version_info[0:2] >= (3, 34)'
+		$PYTHON -c 'import sqlite3; print(sqlite3.sqlite_version); assert sqlite3.sqlite_version_info[0:2] >= (3, 31)'
 		# Make sure tkinter module can be loaded properly
 		$PYTHON -c 'import tkinter; print(tkinter.TkVersion); assert tkinter.TkVersion >= 8.6'
 		# cpython shall be available as python

@@ -1,6 +1,12 @@
-FROM ubuntu:22.04
+ARG POLICY=manylinux_2_35
+ARG BASE_IMAGE_VERSION=${POLICY}
+ARG BASE_IMAGE_VERSION=${BASE_IMAGE_VERSION/manylinux_2_31/20.04}
+ARG BASE_IMAGE_VERSION=${BASE_IMAGE_VERSION/manylinux_2_35/22.04}
+
+FROM ubuntu:${BASE_IMAGE_VERSION}
 
 ARG DEBIAN_FRONTEND=noninteractive
+ARG POLICY
 
 RUN rm -f /etc/apt/apt.conf.d/docker-clean; echo 'Binary::apt::APT::Keep-Downloaded-Packages "true";' > /etc/apt/apt.conf.d/keep-cache
 
@@ -14,6 +20,7 @@ RUN --mount=type=cache,target=/var/cache/apt,sharing=locked \
       build-essential \
       curl \
       gpg-agent \
+      hardlink \
       libtool \
       software-properties-common
 
@@ -57,7 +64,7 @@ ARG PLATFORM=${PLATFORM/amd64/x86_64}
 ARG PLATFORM=${PLATFORM/arm64/aarch64}
 ARG PLATFORM=${PLATFORM/arm/armv7l}
 
-ENV AUDITWHEEL_POLICY=manylinux_2_35 AUDITWHEEL_ARCH=${PLATFORM} AUDITWHEEL_PLAT=manylinux_2_35_${PLATFORM}
+ENV AUDITWHEEL_POLICY=${POLICY} AUDITWHEEL_ARCH=${PLATFORM} AUDITWHEEL_PLAT=${POLICY}_${PLATFORM}
 
 
 COPY manylinux/docker/manylinux-entrypoint /usr/local/bin/manylinux-entrypoint
