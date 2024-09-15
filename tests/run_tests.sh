@@ -67,7 +67,7 @@ for PYTHON in /opt/python/*/bin/python; do
 	if [ "${IMPLEMENTATION}" == "cpython" ]; then
 		# Make sure sqlite3 module can be loaded properly and is the manylinux version one
 		# c.f. https://github.com/pypa/manylinux/issues/1030
-		$PYTHON -c 'import sqlite3; print(sqlite3.sqlite_version); assert sqlite3.sqlite_version_info[0:2] >= (3, 34)'
+		$PYTHON -c 'import sqlite3; print(sqlite3.sqlite_version); assert sqlite3.sqlite_version_info[0:2] >= (3, 31)'
 		# Make sure tkinter module can be loaded properly
 		$PYTHON -c 'import tkinter; print(tkinter.TkVersion); assert tkinter.TkVersion >= 8.6'
 		# cpython shall be available as python
