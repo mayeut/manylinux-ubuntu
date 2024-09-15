@@ -20,9 +20,9 @@ RUN --mount=type=cache,target=/var/cache/apt,sharing=locked \
       build-essential \
       curl \
       gpg-agent \
+      hardlink \
       libtool \
-      software-properties-common \
-      util-linux
+      software-properties-common
 
 # git
 RUN --mount=type=cache,target=/var/cache/apt,sharing=locked \
