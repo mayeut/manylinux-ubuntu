@@ -7,12 +7,9 @@ on:
     branches:
       - main
 
-env:
-  REGISTRY_IMAGE: ghcr.io/${{ github.repository_owner }}/manylinux_2_35
-
 jobs:
   build_image:
-    name: Build ${{ matrix.platform }} image
+    name: Build ${{ matrix.policy }}_${{ matrix.platform }} image
     runs-on: ubuntu-latest
     permissions:
       packages: write
@@ -20,6 +17,9 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
+        policy:
+          - manylinux_2_31
+          - manylinux_2_35
         platform:
           - amd64
           - arm64
@@ -36,19 +36,19 @@ jobs:
       - name: Set up Docker Buildx
         uses: docker/setup-buildx-action@v3
 
-      - name: Build ${{ matrix.platform }} image
+      - name: Build ${{ matrix.policy }}_${{ matrix.platform }} image
         uses: docker/build-push-action@v6
         with:
           context: .
           platforms: linux/${{ matrix.platform }}
           load: true
           push: false
-          tags: manylinux_2_35:latest
-          cache-from: type=gha,scope=${{ matrix.platform }}
-          cache-to: type=gha,mode=max,scope=${{ matrix.platform }}
+          tags: ${{ matrix.policy }}:latest
+          cache-from: type=gha,scope=${{ matrix.policy }}_${{ matrix.platform }}
+          cache-to: type=gha,mode=max,scope=${{ matrix.policy }}_${{ matrix.platform }}
 
-      - name: Test ${{ matrix.platform }} image
-        run: docker run --rm -v $(pwd)/tests:/tests:ro manylinux_2_35:latest /tests/run_tests.sh
+      - name: Test ${{ matrix.policy }}_${{ matrix.platform }} image
+        run: docker run --rm -v $(pwd)/tests:/tests:ro ${{ matrix.policy }}:latest /tests/run_tests.sh
 
       - name: Login to GitHub Container Registry
         if: github.event_name == 'push'
@@ -66,8 +66,8 @@ jobs:
           context: .
           platforms: linux/${{ matrix.platform }}
           push: true
-          cache-from: type=gha,scope=${{ matrix.platform }}
-          outputs: type=image,name=${{ env.REGISTRY_IMAGE }},push-by-digest=true,name-canonical=true,push=true
+          cache-from: type=gha,scope=${{ matrix.policy }}_${{ matrix.platform }}
+          outputs: type=image,name=ghcr.io/${{ github.repository_owner }}/${{ matrix.policy }},push-by-digest=true,name-canonical=true,push=true
 
       - name: Export digest
         if: github.event_name == 'push'
@@ -80,7 +80,7 @@ jobs:
         if: github.event_name == 'push'
         uses: actions/upload-artifact@v4
         with:
-          name: digests-${{ matrix.platform }}
+          name: digests-${{ matrix.policy }}_${{ matrix.platform }}
           path: /tmp/digests/*
           if-no-files-found: error
           retention-days: 1
@@ -93,6 +93,12 @@ jobs:
       contents: read
     needs:
       - build_image
+    strategy:
+      fail-fast: false
+      matrix:
+        policy:
+          - manylinux_2_31
+          - manylinux_2_35
     steps:
       - uses: actions/checkout@v4
         with:
@@ -102,7 +108,7 @@ jobs:
         uses: actions/download-artifact@v4
         with:
           path: /tmp/digests
-          pattern: digests-*
+          pattern: digests-${{ matrix.policy }}*
           merge-multiple: true
 
       - name: Set up Docker Buildx
@@ -125,7 +131,7 @@ jobs:
         id: meta
         uses: docker/metadata-action@v5
         with:
-          images: ${{ env.REGISTRY_IMAGE }}
+          images: ghcr.io/${{ github.repository_owner }}/${{ matrix.policy }}
           tags: |
             type=raw,value=latest
             type=raw,value=${{ steps.tag.outputs.tag }}
@@ -141,4 +147,4 @@ jobs:
         working-directory: /tmp/digests
         run: |
           docker buildx imagetools create $(jq -cr '.tags | map("-t " + .) | join(" ")' <<< "$DOCKER_METADATA_OUTPUT_JSON") \
-            $(printf '${{ env.REGISTRY_IMAGE }}@sha256:%s ' *)
+            $(printf 'ghcr.io/${{ github.repository_owner }}/${{ matrix.policy }}@sha256:%s ' *)
