@@ -21,7 +21,8 @@ RUN --mount=type=cache,target=/var/cache/apt,sharing=locked \
       curl \
       gpg-agent \
       libtool \
-      software-properties-common
+      software-properties-common \
+      util-linux
 
 # git
 RUN --mount=type=cache,target=/var/cache/apt,sharing=locked \
