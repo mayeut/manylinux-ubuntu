@@ -66,7 +66,6 @@ ARG PLATFORM=${PLATFORM/arm/armv7l}
 
 ENV AUDITWHEEL_POLICY=${POLICY} AUDITWHEEL_ARCH=${PLATFORM} AUDITWHEEL_PLAT=${POLICY}_${PLATFORM}
 
-
 COPY manylinux/docker/manylinux-entrypoint /usr/local/bin/manylinux-entrypoint
 ENTRYPOINT ["manylinux-entrypoint"]
 
@@ -80,3 +79,5 @@ RUN --mount=type=cache,target=/var/cache/apt,sharing=locked \
     manylinux-entrypoint /opt/_internal/build_scripts/finalize.sh \
       pp39-pypy39_pp73 \
       pp310-pypy310_pp73
+
+ENV SSL_CERT_FILE=/opt/_internal/certs.pem
