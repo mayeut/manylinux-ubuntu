@@ -19,6 +19,7 @@ RUN --mount=type=cache,target=/var/cache/apt,sharing=locked \
       autoconf \
       automake \
       build-essential \
+      ca-certificates \
       curl \
       gpg-agent \
       hardlink \
@@ -76,8 +77,7 @@ COPY finalize-one.sh /opt/_internal/build_scripts/finalize-one.sh
 RUN --mount=type=cache,target=/var/cache/apt,sharing=locked \
     --mount=type=cache,target=/var/lib/apt,sharing=locked \
     apt-get update && \
+    update-ca-certificates --fresh && \
     manylinux-entrypoint /opt/_internal/build_scripts/finalize.sh \
       pp39-pypy39_pp73 \
       pp310-pypy310_pp73
-
-ENV SSL_CERT_FILE=/opt/_internal/certs.pem
