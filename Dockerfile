@@ -7,6 +7,7 @@ FROM ubuntu:${BASE_IMAGE_VERSION}
 
 ARG DEBIAN_FRONTEND=noninteractive
 ARG POLICY
+ARG TARGETARCH
 
 RUN rm -f /etc/apt/apt.conf.d/docker-clean; echo 'Binary::apt::APT::Keep-Downloaded-Packages "true";' > /etc/apt/apt.conf.d/keep-cache
 
@@ -18,6 +19,7 @@ RUN --mount=type=cache,target=/var/cache/apt,sharing=locked \
       autoconf \
       automake \
       build-essential \
+      ca-certificates \
       curl \
       gpg-agent \
       hardlink \
@@ -27,7 +29,7 @@ RUN --mount=type=cache,target=/var/cache/apt,sharing=locked \
 # git
 RUN --mount=type=cache,target=/var/cache/apt,sharing=locked \
     --mount=type=cache,target=/var/lib/apt,sharing=locked \
-    add-apt-repository ppa:git-core/ppa && \
+    (test "${TARGETARCH}" = "riscv64" || add-apt-repository ppa:git-core/ppa) && \
     apt-get update && \
     apt-get install --no-install-recommends -y git
 
@@ -58,14 +60,12 @@ RUN --mount=type=cache,target=/var/cache/apt,sharing=locked \
       python3.13-nogil \
       python3.13-tk-nogil
 
-ARG TARGETARCH
 ARG PLATFORM=${TARGETARCH}
 ARG PLATFORM=${PLATFORM/amd64/x86_64}
 ARG PLATFORM=${PLATFORM/arm64/aarch64}
 ARG PLATFORM=${PLATFORM/arm/armv7l}
 
 ENV AUDITWHEEL_POLICY=${POLICY} AUDITWHEEL_ARCH=${PLATFORM} AUDITWHEEL_PLAT=${POLICY}_${PLATFORM}
-
 
 COPY manylinux/docker/manylinux-entrypoint /usr/local/bin/manylinux-entrypoint
 ENTRYPOINT ["manylinux-entrypoint"]
@@ -74,6 +74,10 @@ COPY manylinux/docker/build_scripts /opt/_internal/build_scripts/
 COPY finalize.sh /opt/_internal/build_scripts/finalize.sh
 COPY finalize-one.sh /opt/_internal/build_scripts/finalize-one.sh
 
-RUN manylinux-entrypoint /opt/_internal/build_scripts/finalize.sh \
+RUN --mount=type=cache,target=/var/cache/apt,sharing=locked \
+    --mount=type=cache,target=/var/lib/apt,sharing=locked \
+    apt-get update && \
+    update-ca-certificates --fresh && \
+    manylinux-entrypoint /opt/_internal/build_scripts/finalize.sh \
       pp39-pypy39_pp73 \
       pp310-pypy310_pp73
