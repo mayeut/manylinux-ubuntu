@@ -76,7 +76,14 @@ pipx upgrade-shared --pip-args="--no-index --find-links=/tmp/pinned-wheels"
 for TOOL_PATH in $(find ${MY_DIR}/requirements-tools -type f); do
 	TOOL=$(basename ${TOOL_PATH})
 	case ${AUDITWHEEL_PLAT}-${TOOL} in
-		manylinux*_armv7l-cmake|manylinux*_riscv64-cmake|manylinux*_armv7l-swig|manylinux*_riscv64-swig|manylinux*_riscv64-patchelf) apt-get install --no-install-recommends -y ${TOOL};;
+		manylinux*_armv7l-cmake)
+			curl -fsSLo - https://apt.kitware.com/keys/kitware-archive-latest.asc | gpg --dearmor - > /usr/share/keyrings/kitware-archive-keyring.gpg
+			echo "deb [signed-by=/usr/share/keyrings/kitware-archive-keyring.gpg] https://apt.kitware.com/ubuntu/ $(. /etc/os-release; echo ${UBUNTU_CODENAME}) main" > /etc/apt/sources.list.d/kitware.list
+			apt-get update
+			rm /usr/share/keyrings/kitware-archive-keyring.gpg
+			apt-get install --no-install-recommends -y kitware-archive-keyring cmake
+			;;
+		manylinux*_riscv64-cmake|manylinux*_armv7l-swig|manylinux*_riscv64-swig|manylinux*_riscv64-patchelf) apt-get install --no-install-recommends -y ${TOOL};;
 		musllinux*_armv7l-cmake|musllinux*_armv7l-swig) apk add --no-cache ${TOOL};;
 		musllinux*_s390x-uv) continue;;  # uv doesn't provide musl s390x wheels due to Rust issues
 		*) pipx install --pip-args="--require-hashes -r ${TOOL_PATH} --only-binary" ${TOOL};;
