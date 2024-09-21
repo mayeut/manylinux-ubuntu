@@ -26,6 +26,7 @@ jobs:
           - s390x
           - ppc64le
           - arm
+          - riscv64
     steps:
       - uses: actions/checkout@v4
         with:
