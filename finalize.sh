@@ -78,7 +78,7 @@ for TOOL_PATH in $(find ${MY_DIR}/requirements-tools -type f); do
 	case ${AUDITWHEEL_PLAT}-${TOOL} in
 		manylinux*_armv7l-cmake)
 			curl -fsSLo - https://apt.kitware.com/keys/kitware-archive-latest.asc | gpg --dearmor - > /usr/share/keyrings/kitware-archive-keyring.gpg
-			echo 'deb [signed-by=/usr/share/keyrings/kitware-archive-keyring.gpg] https://apt.kitware.com/ubuntu/ focal main' > /etc/apt/sources.list.d/kitware.list
+			echo "deb [signed-by=/usr/share/keyrings/kitware-archive-keyring.gpg] https://apt.kitware.com/ubuntu/ $(. /etc/os-release; echo ${UBUNTU_CODENAME}) main" > /etc/apt/sources.list.d/kitware.list
 			apt-get update
 			rm /usr/share/keyrings/kitware-archive-keyring.gpg
 			apt-get install --no-install-recommends -y kitware-archive-keyring cmake
