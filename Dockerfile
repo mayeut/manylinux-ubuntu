@@ -36,7 +36,7 @@ RUN --mount=type=cache,target=/var/cache/apt,sharing=locked \
 # Pythons
 RUN --mount=type=cache,target=/var/cache/apt,sharing=locked \
     --mount=type=cache,target=/var/lib/apt,sharing=locked \
-    add-apt-repository ppa:deadsnakes/ppa && \
+    add-apt-repository $( (test "${TARGETARCH}" = "riscv64" && echo "ppa:mayeut-github/python-riscv64") || echo "ppa:deadsnakes/ppa" ) && \
     apt-get update && \
     apt-get install --no-install-recommends -y \
       python3.8-dev \
