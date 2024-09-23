@@ -85,7 +85,7 @@ for TOOL_PATH in $(find ${MY_DIR}/requirements-tools -type f); do
 			;;
 		manylinux*_riscv64-cmake|manylinux*_armv7l-swig|manylinux*_riscv64-swig|manylinux*_riscv64-patchelf) apt-get install --no-install-recommends -y ${TOOL};;
 		musllinux*_armv7l-cmake|musllinux*_armv7l-swig) apk add --no-cache ${TOOL};;
-		musllinux*_s390x-uv) continue;;  # uv doesn't provide musl s390x wheels due to Rust issues
+		musllinux*_s390x-uv|*_riscv64-uv) continue;;  # uv doesn't provide musl s390x wheels due to Rust issues
 		*) pipx install --pip-args="--require-hashes -r ${TOOL_PATH} --only-binary" ${TOOL};;
 	esac
 done
