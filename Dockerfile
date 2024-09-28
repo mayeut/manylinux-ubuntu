@@ -12,8 +12,7 @@ ARG TARGETARCH
 RUN rm -f /etc/apt/apt.conf.d/docker-clean; echo 'Binary::apt::APT::Keep-Downloaded-Packages "true";' > /etc/apt/apt.conf.d/keep-cache
 
 # Base tools
-RUN --mount=type=cache,target=/var/cache/apt,sharing=locked \
-    --mount=type=cache,target=/var/lib/apt,sharing=locked \
+RUN --mount=type=cache,target=/var/cache/apt,sharing=locked --mount=type=cache,target=/var/lib/apt,sharing=locked \
     apt-get update && \
     apt-get install --no-install-recommends -y \
       autoconf \
@@ -27,15 +26,13 @@ RUN --mount=type=cache,target=/var/cache/apt,sharing=locked \
       software-properties-common
 
 # git
-RUN --mount=type=cache,target=/var/cache/apt,sharing=locked \
-    --mount=type=cache,target=/var/lib/apt,sharing=locked \
+RUN --mount=type=cache,target=/var/cache/apt,sharing=locked --mount=type=cache,target=/var/lib/apt,sharing=locked \
     (test "${TARGETARCH}" = "riscv64" || add-apt-repository ppa:git-core/ppa) && \
     apt-get update && \
     apt-get install --no-install-recommends -y git
 
 # Pythons
-RUN --mount=type=cache,target=/var/cache/apt,sharing=locked \
-    --mount=type=cache,target=/var/lib/apt,sharing=locked \
+RUN --mount=type=cache,target=/var/cache/apt,sharing=locked --mount=type=cache,target=/var/lib/apt,sharing=locked \
     add-apt-repository $( (test "${TARGETARCH}" = "riscv64" && echo "ppa:mayeut-github/python-riscv64") || echo "ppa:deadsnakes/ppa" ) && \
     apt-get update && \
     apt-get install --no-install-recommends -y \
@@ -73,10 +70,25 @@ ENTRYPOINT ["manylinux-entrypoint"]
 COPY manylinux/docker/build_scripts /opt/_internal/build_scripts/
 COPY finalize.sh /opt/_internal/build_scripts/finalize.sh
 
-RUN --mount=type=cache,target=/var/cache/apt,sharing=locked \
-    --mount=type=cache,target=/var/lib/apt,sharing=locked \
-    apt-get update && \
-    update-ca-certificates --fresh && \
-    manylinux-entrypoint /opt/_internal/build_scripts/finalize.sh \
-      pp39-pypy39_pp73 \
-      pp310-pypy310_pp73
+RUN --mount=type=cache,target=/var/cache/apt,sharing=locked --mount=type=cache,target=/var/lib/apt,sharing=locked <<EOFD
+#!/bin/bash
+set -euxo pipefail
+
+apt-get update
+update-ca-certificates --fresh
+
+for VERSION in 3.8 3.9 3.10 3.11 3.12 3.13 3.13t; do
+  python${VERSION} -m venv --without-pip /opt/_internal/cpython-${VERSION}
+done
+
+# overwrite update-system-packages
+cat <<EOF > /opt/_internal/build_scripts/update-system-packages.sh
+#!/bin/bash
+set -euxo pipefail
+# apt-get update
+# apt-get upgrade -y
+exit 0
+EOF
+
+manylinux-entrypoint /opt/_internal/build_scripts/finalize.sh pp39-pypy39_pp73 pp310-pypy310_pp73
+EOFD

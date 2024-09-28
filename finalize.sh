@@ -9,6 +9,15 @@ MY_DIR=$(dirname "${BASH_SOURCE[0]}")
 # Get build utilities
 source $MY_DIR/build_utils.sh
 
+# most people don't need libpython*.a, and they're many megabytes.
+# compress them all together for best efficiency
+if [ $(find /opt/_internal -path '/opt/_internal/cpython-*/lib/libpython*.a' | wc -l) -ne 0 ]; then
+	pushd /opt/_internal
+	XZ_OPT=-9e tar -cJf static-libs-for-embedding-only.tar.xz cpython-*/lib/libpython*.a
+	popd
+fi
+find /opt/_internal -name '*.a' -print0 | xargs -0 rm -f
+
 # disable some pip warnings
 export PIP_ROOT_USER_ACTION=ignore
 export PIP_DISABLE_PIP_VERSION_CHECK=1
@@ -18,9 +27,7 @@ export PIP_CACHE_DIR=/tmp/pip_cache
 
 # update package, create symlinks for each python
 mkdir /opt/python
-for VERSION in 3.8 3.9 3.10 3.11 3.12 3.13 3.13t; do
-	PREFIX=/opt/_internal/cpython-${VERSION}
-	python${VERSION} -m venv --without-pip ${PREFIX}
+for PREFIX in $(find /opt/_internal/ -mindepth 1 -maxdepth 1 -name 'cpython*'); do
 	${MY_DIR}/finalize-one.sh ${PREFIX}
 done
 
@@ -98,3 +105,6 @@ clean_pyc /opt/_internal
 rm -rf /tmp/* || true
 
 hardlink -c /opt/_internal
+
+# update system packages
+LC_ALL=C ${MY_DIR}/update-system-packages.sh
