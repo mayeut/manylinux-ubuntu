@@ -68,7 +68,6 @@ COPY manylinux/docker/manylinux-entrypoint /usr/local/bin/manylinux-entrypoint
 ENTRYPOINT ["manylinux-entrypoint"]
 
 COPY manylinux/docker/build_scripts /opt/_internal/build_scripts/
-COPY finalize.sh /opt/_internal/build_scripts/finalize.sh
 
 RUN --mount=type=cache,target=/var/cache/apt,sharing=locked --mount=type=cache,target=/var/lib/apt,sharing=locked <<EOFD
 #!/bin/bash
@@ -81,8 +80,22 @@ for VERSION in 3.8 3.9 3.10 3.11 3.12 3.13 3.13t; do
   python${VERSION} -m venv --without-pip /opt/_internal/cpython-${VERSION}
 done
 
+# patch tools installation
+cat <<'EOF' | sed -i "/TOOL} in/r /dev/stdin" /opt/_internal/build_scripts/finalize.sh
+		manylinux*_armv7l-cmake)
+			curl -fsSLo - https://apt.kitware.com/keys/kitware-archive-latest.asc | gpg --dearmor - > /usr/share/keyrings/kitware-archive-keyring.gpg
+			echo "deb [signed-by=/usr/share/keyrings/kitware-archive-keyring.gpg] https://apt.kitware.com/ubuntu/ $(. /etc/os-release; echo ${UBUNTU_CODENAME}) main" > /etc/apt/sources.list.d/kitware.list
+			apt-get update
+			rm /usr/share/keyrings/kitware-archive-keyring.gpg
+			apt-get install --no-install-recommends -y kitware-archive-keyring cmake
+			;;
+		manylinux*_riscv64-patchelf) pipx install patchelf==0.17.2.1;;
+		manylinux*_riscv64-cmake|manylinux*_armv7l-swig|manylinux*_riscv64-swig) apt-get install --no-install-recommends -y ${TOOL};;
+		*_riscv64-uv) continue;;  # no uv for riscv64
+EOF
+
 # overwrite update-system-packages
-cat <<EOF > /opt/_internal/build_scripts/update-system-packages.sh
+cat <<'EOF' > /opt/_internal/build_scripts/update-system-packages.sh
 #!/bin/bash
 set -euxo pipefail
 # apt-get update
