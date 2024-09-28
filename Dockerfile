@@ -72,7 +72,6 @@ ENTRYPOINT ["manylinux-entrypoint"]
 
 COPY manylinux/docker/build_scripts /opt/_internal/build_scripts/
 COPY finalize.sh /opt/_internal/build_scripts/finalize.sh
-COPY finalize-one.sh /opt/_internal/build_scripts/finalize-one.sh
 
 RUN --mount=type=cache,target=/var/cache/apt,sharing=locked \
     --mount=type=cache,target=/var/lib/apt,sharing=locked \
