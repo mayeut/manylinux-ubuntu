@@ -89,7 +89,10 @@ cat <<'EOF' | sed -i "/TOOL} in/r /dev/stdin" /opt/_internal/build_scripts/final
 			rm /usr/share/keyrings/kitware-archive-keyring.gpg
 			apt-get install --no-install-recommends -y kitware-archive-keyring cmake
 			;;
-		manylinux*_riscv64-patchelf) pipx install patchelf==0.17.2.1;;
+		manylinux*_riscv64-patchelf)
+			apt-get install --no-install-recommends -y cmake
+			pipx install patchelf==0.17.2.1
+			;;
 		manylinux*_riscv64-cmake|manylinux*_armv7l-swig|manylinux*_riscv64-swig) apt-get install --no-install-recommends -y ${TOOL};;
 		*_riscv64-uv) continue;;  # no uv for riscv64
 EOF
