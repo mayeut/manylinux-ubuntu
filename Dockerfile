@@ -27,7 +27,7 @@ RUN --mount=type=cache,target=/var/cache/apt,sharing=locked --mount=type=cache,t
 
 # git
 RUN --mount=type=cache,target=/var/cache/apt,sharing=locked --mount=type=cache,target=/var/lib/apt,sharing=locked \
-    (test "${TARGETARCH}" = "riscv64" || add-apt-repository ppa:git-core/ppa) && \
+    add-apt-repository ppa:git-core/ppa && \
     apt-get update && \
     apt-get install --no-install-recommends -y git
 
