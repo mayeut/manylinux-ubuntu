@@ -36,7 +36,7 @@ RUN --mount=type=cache,target=/var/cache/apt,sharing=locked --mount=type=cache,t
     add-apt-repository ppa:mayeut-github/python-$(. /etc/os-release; echo ${UBUNTU_CODENAME}) && \
     apt-get update && \
     apt-get install --no-install-recommends -y \
-      $(if [ "${POLICY}" == "manylinux_2_31" ]; then echo "python3.6-dev python3.6-tk python3.6-venv"; fi) \
+      $(if [ "${POLICY}" = "manylinux_2_31" ]; then echo "python3.6-dev python3.6-tk python3.6-venv"; fi) \
       python3.7-dev python3.7-tk python3.7-venv \
       python3.8-dev python3.8-tk python3.8-venv \
       python3.9-dev python3.9-tk python3.9-venv \
