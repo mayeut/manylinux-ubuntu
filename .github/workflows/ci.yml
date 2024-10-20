@@ -51,7 +51,15 @@ jobs:
           cache-to: type=gha,mode=max,scope=${{ matrix.policy }}_${{ matrix.platform }}
 
       - name: Test image
-        run: docker run --rm --platform linux/${{ matrix.platform }} -e "ADJUST_CPYTHON_COUNT=- 2" -v $(pwd)/manylinux/tests:/tests:ro ${{ matrix.policy }}:latest /tests/run_tests.sh
+        run: |
+          if [ "${{ matrix.platform }}" = "riscv64" ]; then
+              # no cpython 3.6/3.7
+              export ADJUST_CPYTHON_COUNT="- 2"
+          elif [ "${{ matrix.policy }}" != "manylinux_2_31" ]; then
+              # no cpython 3.6
+              export ADJUST_CPYTHON_COUNT="- 1"
+          fi
+          docker run --rm --platform linux/${{ matrix.platform }} -e ADJUST_CPYTHON_COUNT -v $(pwd)/manylinux/tests:/tests:ro ${{ matrix.policy }}:latest /tests/run_tests.sh
 
       - name: Login to GitHub Container Registry
         if: github.event_name == 'push'
