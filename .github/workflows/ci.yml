@@ -54,7 +54,7 @@ jobs:
         run: |
           if [ "${{ matrix.policy }}" != "manylinux_2_31" ] || [ "${{ matrix.platform }}" = "riscv64" ]; then
               # no cpython 3.6
-              ADJUST_CPYTHON_COUNT="- 1"
+              export ADJUST_CPYTHON_COUNT="- 1"
           fi
           docker run --rm --platform linux/${{ matrix.platform }} -e ADJUST_CPYTHON_COUNT -v $(pwd)/manylinux/tests:/tests:ro ${{ matrix.policy }}:latest /tests/run_tests.sh
 
