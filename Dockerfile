@@ -33,29 +33,18 @@ RUN --mount=type=cache,target=/var/cache/apt,sharing=locked --mount=type=cache,t
 
 # Pythons
 RUN --mount=type=cache,target=/var/cache/apt,sharing=locked --mount=type=cache,target=/var/lib/apt,sharing=locked \
-    add-apt-repository $( (test "${TARGETARCH}" = "riscv64" && echo "ppa:mayeut-github/python-riscv64") || echo "ppa:deadsnakes/ppa" ) && \
+    add-apt-repository ppa:mayeut-github/python-$(. /etc/os-release; echo ${UBUNTU_CODENAME}) && \
     apt-get update && \
     apt-get install --no-install-recommends -y \
-      python3.8-dev \
-      python3.8-tk \
-      python3.8-venv \
-      python3.9-dev \
-      python3.9-tk \
-      python3.9-venv \
-      python3.10-dev \
-      python3.10-tk \
-      python3.10-venv \
-      python3.11-dev \
-      python3.11-tk \
-      python3.11-venv \
-      python3.12-dev \
-      python3.12-tk \
-      python3.12-venv \
-      python3.13-dev \
-      python3.13-tk \
-      python3.13-venv \
-      python3.13-nogil \
-      python3.13-tk-nogil
+      $(if [ "${POLICY}" == "manylinux_2_31" ]; then echo "python3.6-dev python3.6-tk python3.6-venv"; fi) \
+      python3.7-dev python3.7-tk python3.7-venv \
+      python3.8-dev python3.8-tk python3.8-venv \
+      python3.9-dev python3.9-tk python3.9-venv \
+      python3.10-dev python3.10-tk python3.10-venv \
+      python3.11-dev python3.11-tk python3.11-venv \
+      python3.12-dev python3.12-tk python3.12-venv \
+      python3.13-dev python3.13-tk python3.13-venv \
+      python3.13-nogil python3.13-tk-nogil
 
 ARG PLATFORM=${TARGETARCH}
 ARG PLATFORM=${PLATFORM/amd64/x86_64}
@@ -76,7 +65,12 @@ set -euxo pipefail
 apt-get update
 update-ca-certificates --fresh
 
-for VERSION in 3.8 3.9 3.10 3.11 3.12 3.13 3.13t; do
+VERSIONS="3.7 3.8 3.9 3.10 3.11 3.12 3.13 3.13t"
+if [ "${POLICY}" == "manylinux_2_31" ]; then
+	VERSIONS="3.6 ${VERSIONS}"
+fi
+
+for VERSION in ${VERSIONS}; do
   python${VERSION} -m venv --without-pip /opt/_internal/cpython-${VERSION}
 done
 
