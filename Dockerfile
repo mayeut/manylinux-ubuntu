@@ -66,7 +66,7 @@ apt-get update
 update-ca-certificates --fresh
 
 VERSIONS="3.7 3.8 3.9 3.10 3.11 3.12 3.13 3.13t"
-if [ "${POLICY}" == "manylinux_2_31" ]; then
+if [ "${POLICY}" == "manylinux_2_31" ] && [ "${TARGETARCH}" != "riscv64" ]; then
 	VERSIONS="3.6 ${VERSIONS}"
 fi
 
