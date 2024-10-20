@@ -52,7 +52,10 @@ jobs:
 
       - name: Test image
         run: |
-          if [ "${{ matrix.policy }}" != "manylinux_2_31" ] || [ "${{ matrix.platform }}" = "riscv64" ]; then
+          if [ "${{ matrix.platform }}" = "riscv64" ]; then
+              # no cpython 3.6/3.7
+              export ADJUST_CPYTHON_COUNT="- 2"
+          elif [ "${{ matrix.policy }}" != "manylinux_2_31" ]; then
               # no cpython 3.6
               export ADJUST_CPYTHON_COUNT="- 1"
           fi

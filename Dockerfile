@@ -37,7 +37,7 @@ RUN --mount=type=cache,target=/var/cache/apt,sharing=locked --mount=type=cache,t
     apt-get update && \
     apt-get install --no-install-recommends -y \
       $(if [ "${POLICY}" = "manylinux_2_31" ] && [ "${TARGETARCH}" != "riscv64" ]; then echo "python3.6-dev python3.6-tk python3.6-venv"; fi) \
-      python3.7-dev python3.7-tk python3.7-venv \
+      $(if [ "${TARGETARCH}" != "riscv64" ]; then echo "python3.7-dev python3.7-tk python3.7-venv"; fi) \
       python3.8-dev python3.8-tk python3.8-venv \
       python3.9-dev python3.9-tk python3.9-venv \
       python3.10-dev python3.10-tk python3.10-venv \
@@ -65,7 +65,10 @@ set -euxo pipefail
 apt-get update
 update-ca-certificates --fresh
 
-VERSIONS="3.7 3.8 3.9 3.10 3.11 3.12 3.13 3.13t"
+VERSIONS="3.8 3.9 3.10 3.11 3.12 3.13 3.13t"
+if [ "${TARGETARCH}" != "riscv64" ]; then
+	VERSIONS="3.7 ${VERSIONS}"
+fi
 if [ "${POLICY}" == "manylinux_2_31" ] && [ "${TARGETARCH}" != "riscv64" ]; then
 	VERSIONS="3.6 ${VERSIONS}"
 fi
