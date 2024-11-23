@@ -77,15 +77,16 @@ for VERSION in ${VERSIONS}; do
   python${VERSION} -m venv --without-pip /opt/_internal/cpython-${VERSION}
 done
 
+# patch build utils
+cat <<'EOF' | sed -i "/PACKAGE_MANAGER=yum/r /dev/stdin" /opt/_internal/build_scripts/build_utils.sh
+	elif command -v apt-get >/dev/null 2>&1; then
+		PACKAGE_MANAGER=apt
+EOF
+cat <<'EOF' | sed -i "/OS_ID_LIKE=rhel;;/r /dev/stdin" /opt/_internal/build_scripts/build_utils.sh
+	*debian) OS_ID_LIKE=debian;;
+EOF
 # patch tools installation
 cat <<'EOF' | sed -i "/TOOL} in/r /dev/stdin" /opt/_internal/build_scripts/finalize.sh
-		manylinux*_armv7l-cmake)
-			curl -fsSLo - https://apt.kitware.com/keys/kitware-archive-latest.asc | gpg --dearmor - > /usr/share/keyrings/kitware-archive-keyring.gpg
-			echo "deb [signed-by=/usr/share/keyrings/kitware-archive-keyring.gpg] https://apt.kitware.com/ubuntu/ $(. /etc/os-release; echo ${UBUNTU_CODENAME}) main" > /etc/apt/sources.list.d/kitware.list
-			apt-get update
-			rm /usr/share/keyrings/kitware-archive-keyring.gpg
-			apt-get install --no-install-recommends -y kitware-archive-keyring cmake
-			;;
 		manylinux*_riscv64-patchelf)
 			apt-get install --no-install-recommends -y cmake
 			pipx install patchelf==0.17.2.1
