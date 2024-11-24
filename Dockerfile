@@ -91,7 +91,7 @@ cat <<'EOF' | sed -i "/TOOL} in/r /dev/stdin" /opt/_internal/build_scripts/final
 			apt-get install --no-install-recommends -y cmake
 			pipx install patchelf==0.17.2.1
 			;;
-		manylinux*_riscv64-cmake|manylinux*_armv7l-swig|manylinux*_riscv64-swig) apt-get install --no-install-recommends -y ${TOOL};;
+		manylinux*_riscv64-cmake|manylinux*_riscv64-swig) apt-get install --no-install-recommends -y ${TOOL};;
 		*_riscv64-uv) continue;;  # no uv for riscv64
 EOF
 
