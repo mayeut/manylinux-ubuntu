@@ -14,7 +14,7 @@ on:
 jobs:
   build_image:
     name: Build ${{ matrix.policy }} ${{ matrix.platform }} image
-    runs-on: ubuntu-latest
+    runs-on: "ubuntu-24.04${{ startsWith(matrix.platform, 'arm') && '-arm' || '' }}"
     permissions:
       packages: write
       contents: read
@@ -37,6 +37,7 @@ jobs:
           submodules: 'recursive'
 
       - name: Set up QEMU
+        if: runner.arch == 'X64' && matrix.platform != 'amd64'
         uses: docker/setup-qemu-action@v3
 
       - name: Set up Docker Buildx
