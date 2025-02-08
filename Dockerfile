@@ -77,32 +77,15 @@ for VERSION in ${VERSIONS}; do
   python${VERSION} -m venv --without-pip /opt/_internal/cpython-${VERSION}
 done
 
-# patch build utils
-cat <<'EOF' | sed -i "/PACKAGE_MANAGER=yum/r /dev/stdin" /opt/_internal/build_scripts/build_utils.sh
-	elif command -v apt-get >/dev/null 2>&1; then
-		PACKAGE_MANAGER=apt
-EOF
-cat <<'EOF' | sed -i "/OS_ID_LIKE=rhel;;/r /dev/stdin" /opt/_internal/build_scripts/build_utils.sh
-	*debian) OS_ID_LIKE=debian;;
-EOF
 # patch tools installation
 cat <<'EOF' | sed -i "/TOOL} in/r /dev/stdin" /opt/_internal/build_scripts/finalize.sh
-		manylinux*_riscv64-patchelf)
-			apt-get install --no-install-recommends -y cmake
+		*_riscv64-uv) continue;;  # no uv for riscv64
+		*_riscv64-cmake|*_riscv64-swig) manylinux_pkg_install "${TOOL}";;
+		*_riscv64-patchelf)
+			manylinux_pkg_install cmake
 			pipx install patchelf==0.17.2.1
 			;;
-		manylinux*_riscv64-cmake|manylinux*_riscv64-swig) apt-get install --no-install-recommends -y ${TOOL};;
-		*_riscv64-uv) continue;;  # no uv for riscv64
 EOF
 
-# overwrite update-system-packages
-cat <<'EOF' > /opt/_internal/build_scripts/update-system-packages.sh
-#!/bin/bash
-set -euxo pipefail
-# apt-get update
-# apt-get upgrade -y
-exit 0
-EOF
-
-manylinux-entrypoint /opt/_internal/build_scripts/finalize.sh pp310-pypy310_pp73
+manylinux-entrypoint /opt/_internal/build_scripts/finalize.sh pp310-pypy310_pp73 pp311-pypy311_pp73
 EOFD
