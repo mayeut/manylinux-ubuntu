@@ -87,5 +87,13 @@ cat <<'EOF' | sed -i "/TOOL} in/r /dev/stdin" /opt/_internal/build_scripts/final
 			;;
 EOF
 
+# overwrite update-system-packages
+cat <<'EOF' > /opt/_internal/build_scripts/update-system-packages.sh
+#!/bin/bash
+set -euxo pipefail
+# apt-get update
+# apt-get upgrade -y
+exit 0
+
 manylinux-entrypoint /opt/_internal/build_scripts/finalize.sh pp310-pypy310_pp73 pp311-pypy311_pp73
 EOFD
