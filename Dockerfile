@@ -42,7 +42,8 @@ RUN --mount=type=cache,target=/var/cache/apt,sharing=locked --mount=type=cache,t
       python3.11-dev python3.11-tk python3.11-venv \
       python3.12-dev python3.12-tk python3.12-venv \
       python3.13-dev python3.13-tk python3.13-venv \
-      python3.13-nogil python3.13-tk-nogil
+      python3.13-nogil python3.13-tk-nogil \
+      $(if [ "${POLICY}" != "manylinux_2_31" ]; then echo "python3.14-dev python3.14-tk python3.14-venv python3.14-nogil python3.14-tk-nogil"; fi)
 
 ARG PLATFORM=${TARGETARCH}
 ARG PLATFORM=${PLATFORM/amd64/x86_64}
@@ -64,6 +65,9 @@ apt-get update
 update-ca-certificates --fresh
 
 VERSIONS="3.8 3.9 3.10 3.11 3.12 3.13 3.13t"
+if [ "${POLICY}" != "manylinux_2_31" ]; then
+	VERSIONS="${VERSIONS} 3.14 3.14t"
+fi
 
 for VERSION in ${VERSIONS}; do
   python${VERSION} -m venv --without-pip /opt/_internal/cpython-${VERSION}
