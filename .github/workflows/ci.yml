@@ -59,7 +59,11 @@ jobs:
 
       - name: Test image
         run: |
-          docker run --rm --platform linux/${{ matrix.platform }} -v $(pwd)/manylinux/tests:/tests:ro ${{ matrix.policy }}:latest /tests/run_tests.sh
+          if [ "${{ matrix.policy }}" = "manylinux_2_31" ]; then
+              # no cpython 3.14
+              export ADJUST_CPYTHON_COUNT="- 2"
+          fi
+          docker run --rm --platform linux/${{ matrix.platform }} -e ADJUST_CPYTHON_COUNT -v $(pwd)/manylinux/tests:/tests:ro ${{ matrix.policy }}:latest /tests/run_tests.sh
 
       - name: Login to GitHub Container Registry
         if: github.event_name == 'push'
