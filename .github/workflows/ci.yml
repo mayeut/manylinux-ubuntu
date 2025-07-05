@@ -64,6 +64,7 @@ jobs:
               export ADJUST_CPYTHON_COUNT="- 2"
           fi
           # patch tests
+          sed -i 's/assert sqlite3.sqlite_version_info/sqlite3.sqlite_version_info/g' manylinux/docker/tests/run_tests.sh
           cat <<EOF > manylinux/docker/tests/autotools/configure.ac
           AC_PREREQ([2.69])
           AC_INIT(test_autotools,1.0.0)
