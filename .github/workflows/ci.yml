@@ -64,7 +64,8 @@ jobs:
               export ADJUST_CPYTHON_COUNT="- 2"
           fi
           # patch tests
-          cat <<EOF > manylinux/tests/autotools/configure.ac
+          sed -i 's/assert sqlite3.sqlite_version_info/sqlite3.sqlite_version_info/g' manylinux/docker/tests/run_tests.sh
+          cat <<EOF > manylinux/docker/tests/autotools/configure.ac
           AC_PREREQ([2.69])
           AC_INIT(test_autotools,1.0.0)
           AM_INIT_AUTOMAKE([1.16.1])
@@ -74,7 +75,7 @@ jobs:
           AC_CONFIG_FILES([Makefile])
           AC_OUTPUT
           EOF
-          docker run --rm --platform linux/${{ matrix.platform }} -e ADJUST_CPYTHON_COUNT -v $(pwd)/manylinux/tests:/tests:ro ${{ matrix.policy }}:latest /tests/run_tests.sh
+          docker run --rm --platform linux/${{ matrix.platform }} -e ADJUST_CPYTHON_COUNT -v $(pwd)/manylinux/docker/tests:/tests:ro ${{ matrix.policy }}:latest /tests/run_tests.sh
 
       - name: Login to GitHub Container Registry
         if: github.event_name == 'push'
