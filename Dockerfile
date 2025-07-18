@@ -36,14 +36,14 @@ RUN --mount=type=cache,target=/var/cache/apt,sharing=locked --mount=type=cache,t
     add-apt-repository ppa:mayeut-github/python-$(. /etc/os-release; echo ${UBUNTU_CODENAME}) && \
     apt-get update && \
     apt-get install --no-install-recommends -y \
-      python3.8-dev python3.8-tk python3.8-venv \
-      python3.9-dev python3.9-tk python3.9-venv \
-      python3.10-dev python3.10-tk python3.10-venv \
-      python3.11-dev python3.11-tk python3.11-venv \
-      python3.12-dev python3.12-tk python3.12-venv \
-      python3.13-dev python3.13-tk python3.13-venv \
-      python3.13-nogil python3.13-tk-nogil \
-      $(if [ "${POLICY}" != "manylinux_2_31" ]; then echo "python3.14-dev python3.14-tk python3.14-venv python3.14-nogil python3.14-tk-nogil"; fi)
+      python3.8-dev python3.8-tk python3.8-venv python3.8-gdbm \
+      python3.9-dev python3.9-tk python3.9-venv python3.9-gdbm \
+      python3.10-dev python3.10-tk python3.10-venv python3.10-gdbm \
+      python3.11-dev python3.11-tk python3.11-venv python3.11-gdbm \
+      python3.12-dev python3.12-tk python3.12-venv python3.12-gdbm \
+      python3.13-dev python3.13-tk python3.13-venv python3.13-gdbm \
+      python3.13-nogil python3.13-tk-nogil python3.13-gdbm-nogil  \
+      $(if [ "${POLICY}" != "manylinux_2_31" ]; then echo "python3.14-dev python3.14-tk python3.14-venv python3.14-gdbm python3.14-nogil python3.14-tk-nogil python3.14-gdbm-nogil"; fi)
 
 ARG PLATFORM=${TARGETARCH}
 ARG PLATFORM=${PLATFORM/amd64/x86_64}
