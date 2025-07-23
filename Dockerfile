@@ -27,7 +27,7 @@ RUN --mount=type=cache,target=/var/cache/apt,sharing=locked --mount=type=cache,t
 
 # git
 RUN --mount=type=cache,target=/var/cache/apt,sharing=locked --mount=type=cache,target=/var/lib/apt,sharing=locked \
-    if [ "${TARGETARCH}" != "s390x" ]; then add-apt-repository ppa:git-core/ppa; fi && \
+    add-apt-repository ppa:git-core/ppa && \
     apt-get update && \
     apt-get install --no-install-recommends -y git
 
