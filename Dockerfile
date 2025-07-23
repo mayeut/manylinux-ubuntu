@@ -73,16 +73,6 @@ for VERSION in ${VERSIONS}; do
   python${VERSION} -m venv --without-pip /opt/_internal/cpython-${VERSION}
 done
 
-# patch tools installation
-cat <<'EOF' | sed -i "/TOOL} in/r /dev/stdin" /opt/_internal/build_scripts/finalize.sh
-		*_riscv64-uv) continue;;  # no uv for riscv64
-		*_riscv64-cmake|*_riscv64-swig) manylinux_pkg_install "${TOOL}";;
-		*_riscv64-patchelf)
-			manylinux_pkg_install cmake
-			pipx install patchelf==0.17.2.2
-			;;
-EOF
-
 # overwrite update-system-packages
 cat <<'EOF' > /opt/_internal/build_scripts/update-system-packages.sh
 #!/bin/bash
