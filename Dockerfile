@@ -87,5 +87,5 @@ set -euxo pipefail
 exit 0
 EOF
 
-manylinux-entrypoint /opt/_internal/build_scripts/finalize.sh pp310-pypy310_pp73 pp311-pypy311_pp73
+manylinux-entrypoint /opt/_internal/build_scripts/finalize.sh pp311-pypy311_pp73
 EOFD
