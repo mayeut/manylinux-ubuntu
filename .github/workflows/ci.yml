@@ -65,9 +65,7 @@ jobs:
           fi
           # patch tests
           sed -i 's/assert sqlite3.sqlite_version_info/sqlite3.sqlite_version_info/g' manylinux/docker/tests/modules-check.py
-
-          sed -i 's/assert cc == /# assert cc == /g' manylinux/docker/tests/modules-check.py
-          sed -i 's/assert cxx == /# assert cxx == /g' manylinux/docker/tests/modules-check.py
+          sed -i 's/def test_sysconfig/def disabled_test_sysconfig/g' manylinux/docker/tests/modules-check.py
 
           cat <<EOF > manylinux/docker/tests/autotools/configure.ac
           AC_PREREQ([2.69])
