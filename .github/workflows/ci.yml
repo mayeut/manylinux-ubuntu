@@ -24,6 +24,7 @@ jobs:
         policy:
           - manylinux_2_31
           - manylinux_2_35
+          - manylinux_2_39
         platform:
           - amd64
           - arm64
@@ -130,6 +131,7 @@ jobs:
         policy:
           - manylinux_2_31
           - manylinux_2_35
+          - manylinux_2_39
     steps:
       - uses: actions/checkout@v5
         with:
