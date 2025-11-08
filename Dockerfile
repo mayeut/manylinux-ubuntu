@@ -23,7 +23,8 @@ RUN --mount=type=cache,target=/var/cache/apt,sharing=locked --mount=type=cache,t
       gpg-agent \
       hardlink \
       libtool \
-      software-properties-common
+      software-properties-common \
+      $(if [ "${TARGETARCH}" == "amd64" ]; then echo "yasm"; fi)
 
 # git
 RUN --mount=type=cache,target=/var/cache/apt,sharing=locked --mount=type=cache,target=/var/lib/apt,sharing=locked \
