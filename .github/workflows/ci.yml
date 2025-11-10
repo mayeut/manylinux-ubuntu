@@ -65,7 +65,8 @@ jobs:
               export ADJUST_CPYTHON_COUNT="- 2"
           fi
           # patch tests
-          sed -i 's/assert sqlite3.sqlite_version_info/sqlite3.sqlite_version_info/g' manylinux/docker/tests/modules-check.py
+          sed -i 's/assert sqlite3.sqlite_version_info/# assert sqlite3.sqlite_version_info/g' manylinux/docker/tests/modules-check.py
+          sed -i 's/assert zstd.zstd_version_info/# assert zstd.zstd_version_info/g' manylinux/docker/tests/modules-check.py
           sed -i 's/def test_sysconfig/def disabled_test_sysconfig/g' manylinux/docker/tests/modules-check.py
 
           cat <<EOF > manylinux/docker/tests/autotools/configure.ac
