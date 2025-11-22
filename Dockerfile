@@ -75,11 +75,6 @@ for VERSION in ${VERSIONS}; do
   python${VERSION} -m venv --without-pip /opt/_internal/cpython-${VERSION}
 done
 
-# patch tools installation
-cat <<'EOF' | sed -i "/TOOL} in/r /dev/stdin" /opt/_internal/build_scripts/finalize.sh
-		manylinux_2_31_riscv64-cmake) manylinux_pkg_install "${TOOL}";;
-EOF
-
 # overwrite update-system-packages
 cat <<'EOF' > /opt/_internal/build_scripts/update-system-packages.sh
 #!/bin/bash
