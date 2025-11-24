@@ -33,7 +33,7 @@ jobs:
           - arm
           - riscv64
     steps:
-      - uses: actions/checkout@v5
+      - uses: actions/checkout@v6
         with:
           submodules: 'recursive'
 
@@ -134,7 +134,7 @@ jobs:
           - manylinux_2_35
           - manylinux_2_39
     steps:
-      - uses: actions/checkout@v5
+      - uses: actions/checkout@v6
         with:
           fetch-depth: 50
 
