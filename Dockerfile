@@ -53,6 +53,7 @@ ARG PLATFORM=${PLATFORM/arm64/aarch64}
 ARG PLATFORM=${PLATFORM/arm/armv7l}
 
 ENV AUDITWHEEL_POLICY=${POLICY} AUDITWHEEL_ARCH=${PLATFORM} AUDITWHEEL_PLAT=${POLICY}_${PLATFORM}
+ENV PATH=/opt/clang/bin:${PATH}
 
 COPY manylinux/docker/manylinux-entrypoint /usr/local/bin/manylinux-entrypoint
 ENTRYPOINT ["manylinux-entrypoint"]
