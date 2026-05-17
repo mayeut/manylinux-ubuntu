@@ -62,8 +62,8 @@ jobs:
       - name: Test image
         run: |
           if [ "${{ matrix.policy }}" = "manylinux_2_31" ]; then
-              # no cpython 3.14
-              export ADJUST_CPYTHON_COUNT="- 2"
+              # no cpython 3.14 & 3.15
+              export ADJUST_CPYTHON_COUNT="- 4"
           fi
           # patch tests
           sed -i 's/assert sqlite3.sqlite_version_info/# assert sqlite3.sqlite_version_info/g' manylinux/docker/tests/modules-check.py
