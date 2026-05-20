@@ -70,6 +70,7 @@ jobs:
           sed -i 's/assert zstd.zstd_version_info/# assert zstd.zstd_version_info/g' manylinux/docker/tests/modules-check.py
           sed -i 's/"idlelib",/# "idlelib",/g' manylinux/docker/tests/modules-check.py
           sed -i 's/"lib2to3",/# "lib2to3",/g' manylinux/docker/tests/modules-check.py
+          sed -i 's/modules.remove("lib2to3")/# modules.remove("lib2to3")/g' manylinux/docker/tests/modules-check.py
           sed -i 's/"turtledemo",/# "turtledemo",/g' manylinux/docker/tests/modules-check.py
           sed -i 's/def test_sysconfig/def disabled_test_sysconfig/g' manylinux/docker/tests/modules-check.py
 
