@@ -65,26 +65,7 @@ jobs:
               # no cpython 3.14 & 3.15
               export ADJUST_CPYTHON_COUNT="- 4"
           fi
-          # patch tests
-          sed -i 's/assert sqlite3.sqlite_version_info/# assert sqlite3.sqlite_version_info/g' manylinux/docker/tests/modules-check.py
-          sed -i 's/assert zstd.zstd_version_info/# assert zstd.zstd_version_info/g' manylinux/docker/tests/modules-check.py
-          sed -i 's/"idlelib",/# "idlelib",/g' manylinux/docker/tests/modules-check.py
-          sed -i 's/"lib2to3",/# "lib2to3",/g' manylinux/docker/tests/modules-check.py
-          sed -i 's/modules.remove("lib2to3")/# modules.remove("lib2to3")/g' manylinux/docker/tests/modules-check.py
-          sed -i 's/"turtledemo",/# "turtledemo",/g' manylinux/docker/tests/modules-check.py
-          sed -i 's/def test_sysconfig/def disabled_test_sysconfig/g' manylinux/docker/tests/modules-check.py
-
-          cat <<EOF > manylinux/docker/tests/autotools/configure.ac
-          AC_PREREQ([2.69])
-          AC_INIT(test_autotools,1.0.0)
-          AM_INIT_AUTOMAKE([1.16.1])
-          AC_PROG_LIBTOOL
-          LT_PREREQ([2.4.6])
-          LT_INIT()
-          AC_CONFIG_FILES([Makefile])
-          AC_OUTPUT
-          EOF
-          docker run --rm --platform linux/${{ matrix.platform }} -e ADJUST_CPYTHON_COUNT -v $(pwd)/manylinux/docker/tests:/tests:ro ${{ matrix.policy }}:latest /tests/run_tests.sh
+          docker run --rm --platform linux/${{ matrix.platform }} -e ADJUST_CPYTHON_COUNT -v $(pwd):/tests:ro ${{ matrix.policy }}:latest /tests/run_tests.sh
 
       - name: Login to GitHub Container Registry
         if: github.event_name == 'push'
