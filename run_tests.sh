@@ -22,4 +22,6 @@ AC_CONFIG_FILES([Makefile])
 AC_OUTPUT
 EOF
 
+sed -i 's|AUDITWHEEL_LD_LIBRARY_PATH=.*|AUDITWHEEL_LD_LIBRARY_PATH="${SRC_DIR}/eleven:${SRC_DIR}/ten"|g' /opt/_internal/tests/run_tests.sh
+
 /opt/_internal/tests/run_tests.sh
