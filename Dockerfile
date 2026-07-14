@@ -111,3 +111,5 @@ EOF
 
 manylinux-entrypoint /opt/_internal/build_scripts/finalize.sh pp311-pypy311_pp73
 EOR
+
+COPY manylinux/docker/tests /opt/_internal/tests/
