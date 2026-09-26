@@ -26,7 +26,6 @@ There are no RHEL derivatives for this architecture that would allow for "old sy
 As such, one way forward is to have a Debian derivative image that allows building manylinux wheels for this architecture.
 This comes with some caveats:
 - in order to achieve compatibility with "older" systems, you get an older toolchain:
-    - gcc9 on Ubuntu 20.04 (manylinux_2_31 wheels compatible with Ubuntu 20.04+, Debian 11+)
     - gcc11 on Ubuntu 22.04 (manylinux_2_35 wheels compatible with Ubuntu 22.04+, Debian 12+)
     - gcc13 on Ubuntu 24.04 (manylinux_2_39 wheels compatible with Ubuntu 24.04+, Debian 13+)
 - the package manager & packages names are different than what is found on [pypa/manylinux](https://github.com/pypa/manylinux) images:
