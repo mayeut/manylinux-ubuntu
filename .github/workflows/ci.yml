@@ -22,7 +22,6 @@ jobs:
       fail-fast: false
       matrix:
         policy:
-          - manylinux_2_31
           - manylinux_2_35
           - manylinux_2_39
         platform:
@@ -60,12 +59,7 @@ jobs:
           cache-to: type=gha,mode=max,scope=${{ matrix.policy }}_${{ matrix.platform }}
 
       - name: Test image
-        run: |
-          if [ "${{ matrix.policy }}" = "manylinux_2_31" ]; then
-              # no cpython 3.14 & 3.15
-              export ADJUST_CPYTHON_COUNT="- 4"
-          fi
-          docker run --rm --platform linux/${{ matrix.platform }} -e ADJUST_CPYTHON_COUNT -v $(pwd):/tests:ro ${{ matrix.policy }}:latest /tests/run_tests.sh
+        run: docker run --rm --platform linux/${{ matrix.platform }} -e ADJUST_CPYTHON_COUNT -v $(pwd):/tests:ro ${{ matrix.policy }}:latest /tests/run_tests.sh
 
       - name: Login to GitHub Container Registry
         if: github.event_name == 'push'
@@ -118,7 +112,6 @@ jobs:
       fail-fast: false
       matrix:
         policy:
-          - manylinux_2_31
           - manylinux_2_35
           - manylinux_2_39
     steps:
