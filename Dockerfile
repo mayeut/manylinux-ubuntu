@@ -92,6 +92,9 @@ set -euxo pipefail
 exit 0
 EOF
 
+# used by finalize.sh
+export SSL_CERT_FILE=/etc/ssl/certs/ca-certificates.crt
+
 manylinux-entrypoint /opt/_internal/build_scripts/finalize.sh pp311-pypy311_pp73 pp311-pypy311_pp80 pp312-pypy312_pp80
 EOR
 
